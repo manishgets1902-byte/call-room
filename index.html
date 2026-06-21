@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Private Room</title>
+    <!-- यहाँ नाम बदलकर Echo कर दिया गया है -->
+    <title>Echo</title>
     <!-- PeerJS Library -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -12,7 +13,7 @@
         
         /* Login Screen */
         #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; text-align: center; }
-        h1 { color: #00d2ff; margin-bottom: 5px; }
+        h1 { color: #00d2ff; margin-bottom: 5px; font-weight: normal; letter-spacing: 2px; }
         .box { background: #1e1e1e; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; max-width: 350px; }
         input { width: 90%; padding: 12px; margin: 20px 0; border-radius: 8px; border: 1px solid #333; background: #2c2c2c; color: white; font-size: 18px; outline: none; text-align: center; letter-spacing: 2px;}
         button.call-btn { background: #00d2ff; color: #000; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; transition: 0.3s; }
@@ -43,11 +44,12 @@
     <!-- Screen 1: Login/Connect -->
     <div id="login-screen">
         <div class="box">
-            <h1>Private Room</h1>
+            <!-- यहाँ भी नाम बदलकर Echo कर दिया गया है -->
+            <h1>Echo</h1>
             <p class="my-id-text">Your ID:</p>
             <span id="my-id" class="id-badge">...</span>
             <input type="text" id="partner-id" placeholder="Enter 6-Digit ID" maxlength="6">
-            <button class="call-btn" onclick="callPartner()">Start Call</button>
+            <button class="call-btn" onclick="callPartner()">Connect</button>
         </div>
     </div>
 
@@ -70,13 +72,11 @@
         let currentCall;
         let isMicOn = true;
         let isVideoOn = true;
-        let currentFacingMode = "user"; // "user" = front, "environment" = back
+        let currentFacingMode = "user";
 
-        // Generate a random 6-digit number for the ID
         const generateShortId = () => Math.floor(100000 + Math.random() * 900000).toString();
         const myCustomId = generateShortId();
 
-        // Start PeerJS with the custom 6-digit ID
         peer = new Peer(myCustomId, {
             config: {'iceServers': [
                 { url: 'stun:stun.l.google.com:19302' },
@@ -88,7 +88,6 @@
             document.getElementById("my-id").innerText = id;
         });
 
-        // When receiving a call
         peer.on('call', async (call) => {
             currentCall = call;
             await setupLocalStream();
@@ -100,11 +99,10 @@
             });
         });
 
-        // Make a call
         async function callPartner() {
             const partnerId = document.getElementById("partner-id").value;
             if (!partnerId) {
-                alert("Please enter a valid Partner ID!");
+                alert("Please enter a valid 6-Digit ID!");
                 return;
             }
             await setupLocalStream();
@@ -116,7 +114,6 @@
             });
         }
 
-        // Setup local camera and mic
         async function setupLocalStream() {
             if (localStream) return;
             try {
@@ -131,13 +128,11 @@
             }
         }
 
-        // Switch UI screens
         function showVideoScreen() {
             document.getElementById("login-screen").style.display = "none";
             document.getElementById("video-screen").style.display = "block";
         }
 
-        // 1. Toggle Mic
         function toggleMic() {
             if (!localStream) return;
             isMicOn = !isMicOn;
@@ -152,7 +147,6 @@
             }
         }
 
-        // 2. Toggle Camera
         function toggleVideo() {
             if (!localStream) return;
             isVideoOn = !isVideoOn;
@@ -167,7 +161,6 @@
             }
         }
 
-        // 3. Switch Front/Back Camera
         async function switchCamera() {
             if (!localStream) return;
             
@@ -194,7 +187,6 @@
                 }
             }
             
-            // Handle mirror effect for front/back
             if(currentFacingMode === "environment") {
                  document.getElementById("local-video").style.transform = "scaleX(1)";
             } else {
@@ -202,7 +194,6 @@
             }
         }
 
-        // 4. End Call
         function endCall() {
             if (currentCall) {
                 currentCall.close();
@@ -210,7 +201,6 @@
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
             }
-            // Refresh page to go back to the home screen
             window.location.reload();
         }
     </script>
