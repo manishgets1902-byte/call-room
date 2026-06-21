@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>सिक्रेट कॉलिंग रूम</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .video-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        video {
+            background-color: #000;
+            border-radius: 10px;
+            border: 2px solid #333;
+            width: 100%;
+            max-width: 400px;
+        }
+        .box {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px auto;
+            max-width: 500px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            text-align: center;
+        }
+        button {
+            background-color: #008CBA;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #005f7a;
+        }
+        .id-text {
+            color: #00ff00;
+            font-weight: bold;
+            font-size: 20px;
+            letter-spacing: 1px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🔒 प्राइवेट कॉलिंग रूम</h2>
+    
+    <div class="box" id="step-1">
+        <h3>1. अपना सीक्रेट कमरा बनाएं</h3>
+        <p>अपनी पसंद का कोई भी सीक्रेट ID (नंबर या शब्द) लिखें:</p>
+        <input type="text" id="custom-my-id" placeholder="उदा: 778899 या secret123">
+        <button onclick="initializePeer()">कमरा चालू करें</button>
+    </div>
+
+    <div class="box hidden" id="step-2">
+        <p>आपका चालू ID: <span id="display-my-id" class="id-text">...</span></p>
+        <hr style="border-color: #333;">
+        <p>जुड़ने के लिए दूसरे व्यक्ति का ID डालें:</p>
+        <input type="text" id="partner-id" placeholder="दूसरे का ID डालें">
+        <button onclick="makeCall()">कॉल करें 📞</button>
+    </div>
+
+    <div class="video-container">
+        <video id="local-video" autoplay muted playsinline></video>
+        <video id="remote-video" autoplay playsinline></video>
+    </div>
+
+    <script>
+        const localVideo = document.getElementById('local-video');
+        const remoteVideo = document.getElementById('remote-video');
+        
+        let localStream;
+        let peer;
+
+        // कैमरा और माइक पहले ही चालू कर लें
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                localStream = stream;
+                localVideo.srcObject = stream;
+            })
+            .catch(err => alert('कैमरा/माइक की अनुमति नहीं मिली। कृपया परमिशन दें।'));
+
+        // स्टेप 1: यूज़र के कस्टम ID से Peer चालू करें
+        function initializePeer() {
+            const customId = document.getElementById('custom-my-id').value.trim();
+            if (!customId) {
+                alert("कृपया कोई ID लिखें!");
+                return;
+            }
+
+            // PeerJS को यूज़र के दिए गए ID के साथ शुरू करें
+            peer = new Peer(customId);
+
+            peer.on('open', id => {
+                // सफल होने पर स्टेप 1 छुपाएं और स्टेप 2 दिखाएं
+                document.getElementById('step-1').classList.add('hidden');
+                document.getElementById('step-2').classList.remove('hidden');
+                document.getElementById('display-my-id').innerText = id;
+            });
+
+            peer.on('error', err => {
+                // अगर वह ID पहले से कोई और दुनिया में इस्तेमाल कर रहा है
+                if (err.type === 'unavailable-id') {
+                    alert("यह ID पहले से इस्तेमाल में है। कृपया कोई दूसरा ID चुनें।");
+                } else {
+                    alert("एरर: " + err);
+                }
+            });
+
+            // जब कोई आपको कॉल करे
+            peer.on('call', call => {
+                const accept = confirm("आपके पास एक कॉल आ रही है। क्या आप उठाना चाहते हैं?");
+                if(accept) {
+                    call.answer(localStream);
+                    call.on('stream', remoteStream => {
+                        remoteVideo.srcObject = remoteStream;
+                    });
+                }
+            });
+        }
+
+        // स्टेप 2: दूसरे व्यक्ति को कॉल करें
+        function makeCall() {
+            const partnerId = document.getElementById('partner-id').value.trim();
+            if(!partnerId) {
+                alert("कृपया कॉल करने के लिए ID डालें!");
+                return;
+            }
+            const call = peer.call(partnerId, localStream);
+            call.on('stream', remoteStream => {
+                remoteVideo.srcObject = remoteStream;
+            });
+        }
+    </script>
+</body>
+</html>
