@@ -2,156 +2,216 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>सिक्रेट कॉलिंग रूम</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Private Room</title>
+    <!-- PeerJS Library -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: white;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-        }
-        .video-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        video {
-            background-color: #000;
-            border-radius: 10px;
-            border: 2px solid #333;
-            width: 100%;
-            max-width: 400px;
-        }
-        .box {
-            background-color: #1e1e1e;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 10px auto;
-            max-width: 500px;
-        }
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            border-radius: 5px;
-            border: none;
-            font-size: 16px;
-            text-align: center;
-        }
-        button {
-            background-color: #008CBA;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #005f7a;
-        }
-        .id-text {
-            color: #00ff00;
-            font-weight: bold;
-            font-size: 20px;
-            letter-spacing: 1px;
-        }
-        .hidden {
-            display: none;
-        }
+        /* पूरा डार्क और सिनेमैटिक लुक */
+        body { margin: 0; padding: 0; background-color: #121212; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        
+        /* लॉगिन स्क्रीन की डिज़ाइन */
+        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; text-align: center; }
+        h1 { color: #00d2ff; margin-bottom: 5px; }
+        .box { background: #1e1e1e; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; max-width: 350px; }
+        input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 8px; border: 1px solid #333; background: #2c2c2c; color: white; font-size: 16px; outline: none; }
+        button.call-btn { background: #00d2ff; color: #000; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; transition: 0.3s; }
+        button.call-btn:hover { background: #00a8cc; }
+        .my-id-text { font-size: 18px; color: #aaa; margin-bottom: 20px; }
+        .id-badge { background: #333; padding: 5px 10px; border-radius: 5px; color: #fff; font-weight: bold; letter-spacing: 1px; }
+
+        /* वीडियो स्क्रीन की डिज़ाइन */
+        #video-screen { display: none; position: relative; width: 100vw; height: 100vh; background: #000; }
+        
+        /* सामने वाले का वीडियो (पूरी स्क्रीन पर) */
+        #remote-video { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* आपका अपना वीडियो (कोने में छोटा) */
+        #local-video { position: absolute; bottom: 100px; right: 20px; width: 110px; height: 160px; object-fit: cover; border-radius: 12px; border: 2px solid #555; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 10; background: #222; transform: scaleX(-1); /* मिरर इफ़ेक्ट */ }
+
+        /* नीचे के कंट्रोल बटन्स */
+        #controls { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 20; background: rgba(0, 0, 0, 0.6); padding: 12px 25px; border-radius: 30px; backdrop-filter: blur(10px); }
+        .control-btn { width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: #444; color: white; transition: 0.3s; }
+        .control-btn:active { transform: scale(0.9); }
+        .btn-off { background: #ff4757 !important; color: white; } /* जब माइक/कैमरा बंद हो */
+        .btn-end { background: #ff4757; color: white; }
+        .btn-end:hover { background: #ff6b81; }
     </style>
 </head>
 <body>
 
-    <h2>🔒 प्राइवेट कॉलिंग रूम</h2>
-    
-    <div class="box" id="step-1">
-        <h3>1. अपना सीक्रेट कमरा बनाएं</h3>
-        <p>अपनी पसंद का कोई भी सीक्रेट ID (नंबर या शब्द) लिखें:</p>
-        <input type="text" id="custom-my-id" placeholder="उदा: 778899 या secret123">
-        <button onclick="initializePeer()">कमरा चालू करें</button>
+    <!-- स्क्रीन 1: कॉल कनेक्ट करने की स्क्रीन -->
+    <div id="login-screen">
+        <div class="box">
+            <h1>Private Room</h1>
+            <p class="my-id-text">आपकी ID: <br><span id="my-id" class="id-badge">Connecting...</span></p>
+            <input type="text" id="partner-id" placeholder="पार्टनर की ID यहाँ डालें">
+            <button class="call-btn" onclick="callPartner()">Call Start करें</button>
+        </div>
     </div>
 
-    <div class="box hidden" id="step-2">
-        <p>आपका चालू ID: <span id="display-my-id" class="id-text">...</span></p>
-        <hr style="border-color: #333;">
-        <p>जुड़ने के लिए दूसरे व्यक्ति का ID डालें:</p>
-        <input type="text" id="partner-id" placeholder="दूसरे का ID डालें">
-        <button onclick="makeCall()">कॉल करें 📞</button>
-    </div>
-
-    <div class="video-container">
-        <video id="local-video" autoplay muted playsinline></video>
+    <!-- स्क्रीन 2: वीडियो कॉलिंग और बटन्स की स्क्रीन -->
+    <div id="video-screen">
         <video id="remote-video" autoplay playsinline></video>
+        <video id="local-video" autoplay playsinline muted></video>
+        
+        <div id="controls">
+            <button class="control-btn" id="mic-btn" onclick="toggleMic()">🎤</button>
+            <button class="control-btn" id="cam-btn" onclick="toggleVideo()">📹</button>
+            <button class="control-btn" id="switch-btn" onclick="switchCamera()">🔄</button>
+            <button class="control-btn btn-end" onclick="endCall()">❌</button>
+        </div>
     </div>
 
     <script>
-        const localVideo = document.getElementById('local-video');
-        const remoteVideo = document.getElementById('remote-video');
-        
-        let localStream;
         let peer;
+        let localStream;
+        let currentCall;
+        let isMicOn = true;
+        let isVideoOn = true;
+        let currentFacingMode = "user"; // "user" मतलब फ्रंट कैमरा, "environment" मतलब बैक कैमरा
 
-        // कैमरा और माइक पहले ही चालू कर लें
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-            .then(stream => {
-                localStream = stream;
-                localVideo.srcObject = stream;
-            })
-            .catch(err => alert('कैमरा/माइक की अनुमति नहीं मिली। कृपया परमिशन दें।'));
+        // PeerJS शुरू करें (बिना कस्टम सर्वर के)
+        peer = new Peer({
+            config: {'iceServers': [
+                { url: 'stun:stun.l.google.com:19302' },
+                { url: 'stun:stun1.l.google.com:19302' }
+            ]}
+        });
 
-        // स्टेप 1: यूज़र के कस्टम ID से Peer चालू करें
-        function initializePeer() {
-            const customId = document.getElementById('custom-my-id').value.trim();
-            if (!customId) {
-                alert("कृपया कोई ID लिखें!");
+        peer.on('open', (id) => {
+            document.getElementById("my-id").innerText = id;
+        });
+
+        // जब कोई आपको कॉल करे
+        peer.on('call', async (call) => {
+            currentCall = call;
+            await setupLocalStream();
+            call.answer(localStream);
+            showVideoScreen();
+
+            call.on('stream', (remoteStream) => {
+                document.getElementById("remote-video").srcObject = remoteStream;
+            });
+        });
+
+        // कॉल करने का फंक्शन
+        async function callPartner() {
+            const partnerId = document.getElementById("partner-id").value;
+            if (!partnerId) {
+                alert("कृपया पार्टनर की ID डालें!");
                 return;
             }
+            await setupLocalStream();
+            currentCall = peer.call(partnerId, localStream);
+            showVideoScreen();
 
-            // PeerJS को यूज़र के दिए गए ID के साथ शुरू करें
-            peer = new Peer(customId);
-
-            peer.on('open', id => {
-                // सफल होने पर स्टेप 1 छुपाएं और स्टेप 2 दिखाएं
-                document.getElementById('step-1').classList.add('hidden');
-                document.getElementById('step-2').classList.remove('hidden');
-                document.getElementById('display-my-id').innerText = id;
-            });
-
-            peer.on('error', err => {
-                // अगर वह ID पहले से कोई और दुनिया में इस्तेमाल कर रहा है
-                if (err.type === 'unavailable-id') {
-                    alert("यह ID पहले से इस्तेमाल में है। कृपया कोई दूसरा ID चुनें।");
-                } else {
-                    alert("एरर: " + err);
-                }
-            });
-
-            // जब कोई आपको कॉल करे
-            peer.on('call', call => {
-                const accept = confirm("आपके पास एक कॉल आ रही है। क्या आप उठाना चाहते हैं?");
-                if(accept) {
-                    call.answer(localStream);
-                    call.on('stream', remoteStream => {
-                        remoteVideo.srcObject = remoteStream;
-                    });
-                }
+            currentCall.on('stream', (remoteStream) => {
+                document.getElementById("remote-video").srcObject = remoteStream;
             });
         }
 
-        // स्टेप 2: दूसरे व्यक्ति को कॉल करें
-        function makeCall() {
-            const partnerId = document.getElementById('partner-id').value.trim();
-            if(!partnerId) {
-                alert("कृपया कॉल करने के लिए ID डालें!");
-                return;
+        // अपना कैमरा और माइक चालू करने का फंक्शन
+        async function setupLocalStream() {
+            if (localStream) return;
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: currentFacingMode },
+                    audio: true
+                });
+                document.getElementById("local-video").srcObject = localStream;
+            } catch (err) {
+                alert("कैमरा या माइक की परमिशन नहीं मिली!");
+                console.error(err);
             }
-            const call = peer.call(partnerId, localStream);
-            call.on('stream', remoteStream => {
-                remoteVideo.srcObject = remoteStream;
+        }
+
+        // स्क्रीन बदलने का फंक्शन
+        function showVideoScreen() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("video-screen").style.display = "block";
+        }
+
+        // 1. माइक (Mute/Unmute) बटन का काम
+        function toggleMic() {
+            if (!localStream) return;
+            isMicOn = !isMicOn;
+            localStream.getAudioTracks()[0].enabled = isMicOn;
+            const micBtn = document.getElementById("mic-btn");
+            if(isMicOn) {
+                micBtn.innerText = "🎤";
+                micBtn.classList.remove("btn-off");
+            } else {
+                micBtn.innerText = "🔇";
+                micBtn.classList.add("btn-off");
+            }
+        }
+
+        // 2. कैमरा (Video Off/On) बटन का काम
+        function toggleVideo() {
+            if (!localStream) return;
+            isVideoOn = !isVideoOn;
+            localStream.getVideoTracks()[0].enabled = isVideoOn;
+            const camBtn = document.getElementById("cam-btn");
+            if(isVideoOn) {
+                camBtn.innerText = "📹";
+                camBtn.classList.remove("btn-off");
+            } else {
+                camBtn.innerText = "🚫";
+                camBtn.classList.add("btn-off");
+            }
+        }
+
+        // 3. फ्रंट और बैक कैमरा पलटने (Switch) का काम
+        async function switchCamera() {
+            if (!localStream) return;
+            
+            // पुरानी वीडियो बंद करो
+            const oldVideoTrack = localStream.getVideoTracks()[0];
+            oldVideoTrack.stop();
+
+            // मोड बदलो
+            currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+
+            // नया कैमरा चालू करो
+            const newStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: currentFacingMode },
+                audio: false
             });
+
+            const newVideoTrack = newStream.getVideoTracks()[0];
+            
+            // पुरानी वीडियो की जगह नई वीडियो लगाओ
+            localStream.removeTrack(oldVideoTrack);
+            localStream.addTrack(newVideoTrack);
+            document.getElementById("local-video").srcObject = localStream;
+
+            // अगर कॉल चल रही है, तो पार्टनर को भी नया कैमरा दिखाओ
+            if (currentCall && currentCall.peerConnection) {
+                const sender = currentCall.peerConnection.getSenders().find(s => s.track.kind === "video");
+                if (sender) {
+                    sender.replaceTrack(newVideoTrack);
+                }
+            }
+            
+            // अगर बैक कैमरा है तो मिरर इफ़ेक्ट हटाओ
+            if(currentFacingMode === "environment") {
+                 document.getElementById("local-video").style.transform = "scaleX(1)";
+            } else {
+                 document.getElementById("local-video").style.transform = "scaleX(-1)";
+            }
+        }
+
+        // 4. कॉल कट (End Call) बटन का काम
+        function endCall() {
+            if (currentCall) {
+                currentCall.close();
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            // पेज को रीफ्रेश कर दो ताकि वापस होम स्क्रीन आ जाए
+            window.location.reload();
         }
     </script>
 </body>
