@@ -1,118 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#121212">
-    <title>Echo</title>
     <meta name="application-name" content="Echo">
-    <meta name="apple-mobile-web-app-title" content="Echo">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Echo">
+    <title>Echo</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='120' fill='%23121212'/><circle cx='256' cy='256' r='70' fill='none' stroke='%2300d2ff' stroke-width='40'/><circle cx='256' cy='256' r='150' fill='none' stroke='%2300d2ff' stroke-width='25' opacity='0.7'/><circle cx='256' cy='256' r='230' fill='none' stroke='%2300d2ff' stroke-width='15' opacity='0.3'/><circle cx='256' cy='256' r='25' fill='%2300d2ff'/></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='120' fill='%23121212'/><circle cx='256' cy='256' r='70' fill='none' stroke='%2300d2ff' stroke-width='40'/><circle cx='256' cy='256' r='150' fill='none' stroke='%2300d2ff' stroke-width='25' opacity='0.7'/><circle cx='256' cy='256' r='230' fill='none' stroke='%2300d2ff' stroke-width='15' opacity='0.3'/><circle cx='256' cy='256' r='25' fill='%2300d2ff'/></svg>">
 
-    <!-- PeerJS (jsDelivr, pinned) -->
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
     <style>
         *, *::before, *::after { box-sizing: border-box; }
 
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
+        html, body { height: 100%; margin: 0; }
+
+        body {
             background: #121212;
             color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Tahoma, sans-serif;
             overflow: hidden;
-            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* ---------- Login screen ---------- */
+        .hidden { display: none !important; }
+
+        /* ---------- LOGIN SCREEN ---------- */
         #login-screen {
+            min-height: 100%;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            min-height: 100vh;
-            min-height: 100dvh;
-            padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+            padding: calc(20px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
             text-align: center;
-            overflow-y: auto;
         }
 
         h1 {
             color: #00d2ff;
             margin: 0 0 6px;
             font-weight: normal;
-            letter-spacing: 2px;
-            font-size: clamp(28px, 8vw, 36px);
+            font-size: clamp(2rem, 8vw, 2.6rem);
+            letter-spacing: 4px;
+        }
+
+        .tagline {
+            color: #777;
+            font-size: clamp(13px, 3.5vw, 15px);
+            margin: 0 0 24px;
         }
 
         .box {
             background: #1e1e1e;
-            padding: clamp(20px, 6vw, 30px);
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            padding: clamp(20px, 5vw, 32px);
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
             width: 100%;
             max-width: 380px;
         }
 
-        .my-id-text {
-            font-size: 16px;
+        .my-id-label {
+            font-size: 14px;
             color: #aaa;
             margin: 0 0 10px;
         }
 
+        .id-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         .id-badge {
-            background: #333;
-            padding: 10px 16px;
-            border-radius: 8px;
+            background: #2c2c2c;
+            padding: 10px 14px;
+            border-radius: 10px;
             color: #00d2ff;
             font-weight: bold;
-            font-size: clamp(22px, 7vw, 28px);
-            letter-spacing: 4px;
-            display: inline-block;
-            min-width: 60%;
+            font-size: clamp(16px, 5vw, 22px);
+            letter-spacing: 1px;
+            word-break: break-all;
+            max-width: 100%;
             user-select: all;
         }
 
-        input#partner-id {
+        .id-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .icon-btn {
+            background: #2c2c2c;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 10px;
+            min-height: 40px;
+            padding: 0 14px;
+            font-size: 14px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .icon-btn:active { background: #3a3a3a; }
+
+        .divider {
+            height: 1px;
+            background: #2c2c2c;
+            margin: 22px 0 4px;
+        }
+
+        .label {
+            display: block;
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 18px;
+        }
+
+        input#remote-id {
             width: 100%;
-            padding: 14px;
-            margin: 20px 0 16px;
-            border-radius: 8px;
+            min-height: 52px;
+            padding: 12px 14px;
+            margin: 10px 0 0;
+            border-radius: 10px;
             border: 1px solid #333;
             background: #2c2c2c;
             color: #fff;
-            font-size: 18px;
+            font-size: 18px; /* 16px+ prevents iOS zoom on focus */
             outline: none;
             text-align: center;
-            letter-spacing: 2px;
-            -webkit-appearance: none;
-            appearance: none;
+            letter-spacing: 1px;
         }
-        input#partner-id:focus { border-color: #00d2ff; }
 
-        button.call-btn {
+        input#remote-id:focus { border-color: #00d2ff; }
+
+        .call-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .call-btn {
+            flex: 1;
             background: #00d2ff;
             color: #000;
             font-weight: bold;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 8px;
+            min-height: 52px;
+            padding: 12px 10px;
+            border: 1px solid #00d2ff;
+            border-radius: 10px;
             font-size: 16px;
             cursor: pointer;
-            width: 100%;
-            min-height: 48px;
-            transition: background 0.3s;
-            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background 0.2s, transform 0.1s;
         }
-        button.call-btn:hover, button.call-btn:active { background: #00a8cc; }
 
-        /* ---------- Video screen ---------- */
+        .call-btn:hover { background: #00a8cc; }
+        .call-btn:active { transform: scale(0.98); }
+        .call-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .call-btn.secondary {
+            background: transparent;
+            color: #00d2ff;
+        }
+
+        .call-btn.secondary:hover { background: rgba(0, 210, 255, 0.1); }
+
+        #status {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #888;
+            min-height: 20px;
+        }
+
+        /* ---------- VIDEO SCREEN ---------- */
         #video-screen {
-            display: none;
             position: fixed;
             inset: 0;
             background: #000;
@@ -126,259 +198,530 @@
             height: 100%;
             object-fit: cover;
             background: #000;
+            transition: opacity 0.3s;
         }
 
-        /* Picture-in-picture local preview */
+        #audio-avatar {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .avatar-circle {
+            width: clamp(110px, 32vw, 160px);
+            height: clamp(110px, 32vw, 160px);
+            border-radius: 50%;
+            background: #1e1e1e;
+            border: 3px solid #00d2ff;
+            color: #00d2ff;
+            font-size: clamp(40px, 12vw, 64px);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.25);
+        }
+
+        #audio-label {
+            color: #ccc;
+            font-size: clamp(15px, 4vw, 18px);
+            word-break: break-all;
+        }
+
+        #audio-sub {
+            color: #666;
+            font-size: 14px;
+        }
+
+        #waiting {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        #top-bar {
+            position: absolute;
+            top: calc(12px + env(safe-area-inset-top));
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(20, 20, 20, 0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #fff;
+            font-size: 14px;
+            font-variant-numeric: tabular-nums;
+            z-index: 4;
+            white-space: nowrap;
+        }
+
         #local-video {
             position: absolute;
-            bottom: calc(96px + env(safe-area-inset-bottom));
-            right: max(12px, env(safe-area-inset-right));
-            width: clamp(90px, 28vw, 150px);
+            top: calc(12px + env(safe-area-inset-top));
+            right: calc(12px + env(safe-area-inset-right));
+            width: clamp(96px, 30vw, 170px);
             aspect-ratio: 3 / 4;
             object-fit: cover;
             border-radius: 12px;
-            border: 2px solid #555;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            z-index: 10;
-            background: #222;
+            border: 2px solid #00d2ff;
+            background: #1a1a1a;
             transform: scaleX(-1);
+            z-index: 2;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+            transition: opacity 0.3s;
         }
 
-        /* Controls bar */
-        #controls {
+        .controls {
             position: absolute;
-            bottom: max(20px, env(safe-area-inset-bottom));
+            bottom: calc(20px + env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: clamp(10px, 4vw, 20px);
-            z-index: 20;
-            background: rgba(0, 0, 0, 0.6);
+            gap: clamp(12px, 4vw, 22px);
+            z-index: 3;
             padding: 10px 16px;
-            border-radius: 40px;
+            border-radius: 999px;
+            background: rgba(20, 20, 20, 0.55);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            max-width: calc(100% - 24px);
+            white-space: nowrap;
         }
 
-        .control-btn {
-            width: clamp(46px, 13vw, 56px);
-            height: clamp(46px, 13vw, 56px);
-            flex: 0 0 auto;
+        .ctrl-btn {
+            width: clamp(52px, 14vw, 64px);
+            height: clamp(52px, 14vw, 64px);
             border-radius: 50%;
             border: none;
+            background: rgba(60, 60, 60, 0.9);
+            color: #fff;
             font-size: clamp(18px, 5vw, 22px);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #444;
-            color: #fff;
-            transition: transform 0.2s, background 0.3s;
-            -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-        }
-        .control-btn:active { transform: scale(0.9); }
-
-        .btn-off { background: #ff4757 !important; }
-        .btn-end { background: #ff4757; }
-        .btn-end:hover, .btn-end:active { background: #ff6b81; }
-
-        /* ---------- Tablets ---------- */
-        @media (min-width: 768px) {
-            #local-video { width: 200px; }
-            #controls { padding: 12px 24px; gap: 24px; }
-            .control-btn { width: 60px; height: 60px; font-size: 24px; }
+            transition: background 0.2s, transform 0.1s;
         }
 
-        /* ---------- Landscape phones (short height) ---------- */
+        .ctrl-btn:active { transform: scale(0.94); }
+        .ctrl-btn.off { background: #fff; color: #000; }
+        .ctrl-btn.end { background: #e53935; }
+        .ctrl-btn.end:active { background: #c62828; }
+
+        /* Audio-only mode: hide video, show avatar */
+        #video-screen.audio-mode #remote-video,
+        #video-screen.audio-mode #local-video { opacity: 0; }
+        #video-screen.audio-mode #audio-avatar { display: flex; }
+        #video-screen.audio-mode .cam-btn { display: none; }
+
+        /* ---------- RESPONSIVE ---------- */
+
+        @media (min-width: 600px) {
+            .box { padding: 36px; }
+            input#remote-id { font-size: 20px; }
+        }
+
+        @media (min-width: 900px) {
+            h1 { font-size: 3rem; }
+            .box { max-width: 420px; }
+        }
+
         @media (orientation: landscape) and (max-height: 500px) {
-            #local-video {
-                width: 120px;
-                bottom: calc(76px + env(safe-area-inset-bottom));
-            }
-            #controls {
-                bottom: max(10px, env(safe-area-inset-bottom));
-                padding: 6px 14px;
-                gap: 12px;
-            }
-            .control-btn { width: 44px; height: 44px; font-size: 18px; }
-            #login-screen { justify-content: flex-start; }
+            #login-screen { justify-content: flex-start; padding-top: 12px; }
+            h1 { font-size: 1.8rem; margin-bottom: 0; }
+            .tagline { margin-bottom: 12px; }
             .box { padding: 16px 20px; }
-            input#partner-id { margin: 12px 0; }
+            input#remote-id { min-height: 44px; margin: 8px 0 0; }
+            .call-row { margin-top: 10px; }
+            .call-btn { min-height: 44px; }
+            .divider { margin: 14px 0 0; }
+            #local-video { width: 120px; top: 8px; right: 8px; }
+            #top-bar { top: 8px; }
+            .controls { bottom: 8px; padding: 6px 12px; }
+            .ctrl-btn { width: 48px; height: 48px; }
+            .avatar-circle { width: 90px; height: 90px; }
         }
 
-        @media (prefers-reduced-motion: reduce) {
-            * { transition: none !important; }
+        @media (max-width: 340px) {
+            .id-badge { letter-spacing: 0; font-size: 15px; }
+            .call-btn { font-size: 14px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Screen 1: Login / Connect -->
+    <!-- LOGIN SCREEN -->
     <div id="login-screen">
+        <h1>ECHO</h1>
+        <p class="tagline">Ek click mein video ya audio call</p>
+
         <div class="box">
-            <h1>Echo</h1>
-            <p class="my-id-text">Your ID:</p>
-            <span id="my-id" class="id-badge">...</span>
-            <input type="text" id="partner-id" placeholder="Enter 6-Digit ID" maxlength="6"
-                   inputmode="numeric" pattern="[0-9]*" autocomplete="off">
-            <button class="call-btn" onclick="callPartner()">Connect</button>
+            <p class="my-id-label">Aapka permanent ID</p>
+            <div class="id-row">
+                <span class="id-badge" id="my-id">...</span>
+            </div>
+            <div class="id-actions">
+                <button class="icon-btn" id="copy-btn" type="button">ID copy karein</button>
+                <button class="icon-btn" id="reset-id-btn" type="button">Naya ID banayein</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <label class="label" for="remote-id">Doosre vyakti ka ID daalein</label>
+            <input id="remote-id" type="text" placeholder="ID yahan likhein" autocomplete="off" autocapitalize="off" spellcheck="false">
+
+            <div class="call-row">
+                <button class="call-btn" id="video-call-btn" type="button" disabled>Video call</button>
+                <button class="call-btn secondary" id="audio-call-btn" type="button" disabled>Audio call</button>
+            </div>
+            <div id="status">Connecting...</div>
         </div>
     </div>
 
-    <!-- Screen 2: Video call -->
-    <div id="video-screen">
+    <!-- CALL SCREEN -->
+    <div id="video-screen" class="hidden">
         <video id="remote-video" autoplay playsinline></video>
+
+        <div id="audio-avatar">
+            <div class="avatar-circle" id="avatar-letter">?</div>
+            <div id="audio-label"></div>
+            <div id="audio-sub">Audio call chal rahi hai</div>
+        </div>
+
+        <div id="waiting">Connect ho raha hai...</div>
+
         <video id="local-video" autoplay playsinline muted></video>
 
-        <div id="controls">
-            <button class="control-btn" id="mic-btn" onclick="toggleMic()" aria-label="Toggle microphone">🎤</button>
-            <button class="control-btn" id="cam-btn" onclick="toggleVideo()" aria-label="Toggle camera">📹</button>
-            <button class="control-btn" id="switch-btn" onclick="switchCamera()" aria-label="Switch camera">🔄</button>
-            <button class="control-btn btn-end" onclick="endCall()" aria-label="End call">❌</button>
+        <div id="top-bar" id="timer-wrap"><span id="call-timer">00:00</span></div>
+
+        <div class="controls">
+            <button class="ctrl-btn" id="btn-mute" type="button" title="Mic">&#127897;</button>
+            <button class="ctrl-btn cam-btn" id="btn-cam" type="button" title="Camera">&#127909;</button>
+            <button class="ctrl-btn end" id="btn-end" type="button" title="Call end">&#9742;</button>
         </div>
     </div>
 
     <script>
-        let peer;
-        let localStream;
-        let currentCall;
-        let isMicOn = true;
-        let isVideoOn = true;
-        let currentFacingMode = "user";
+        const $ = id => document.getElementById(id);
 
-        const generateShortId = () => Math.floor(100000 + Math.random() * 900000).toString();
-        const myCustomId = generateShortId();
+        const loginScreen = $('login-screen');
+        const callScreen = $('video-screen');
+        const remoteVideo = $('remote-video');
+        const localVideo = $('local-video');
+        const waiting = $('waiting');
+        const statusEl = $('status');
+        const remoteIdInput = $('remote-id');
+        const videoCallBtn = $('video-call-btn');
+        const audioCallBtn = $('audio-call-btn');
 
-        peer = new Peer(myCustomId, {
-            config: {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
-                ]
+        const ID_KEY = 'echo_permanent_id';
+
+        let peer = null;
+        let activeStream = null;   // stream used in the current call
+        let currentCall = null;
+        let currentType = 'video'; // 'video' or 'audio'
+        let micOn = true;
+        let camOn = true;
+        let timerInterval = null;
+        let callSeconds = 0;
+
+        function setStatus(msg) {
+            statusEl.textContent = msg;
+        }
+
+        /* ---------- PERMANENT ID ---------- */
+
+        function makeId() {
+            // 6-digit numeric ID, never starts with 0
+            return String(100000 + Math.floor(Math.random() * 900000));
+        }
+
+        function getSavedId() {
+            let id = null;
+            try { id = localStorage.getItem(ID_KEY); } catch (e) {}
+            if (!id || !/^\d{6}$/.test(id)) {
+                id = makeId();
+                try { localStorage.setItem(ID_KEY, id); } catch (e) {}
             }
-        });
+            return id;
+        }
 
-        peer.on('open', (id) => {
-            document.getElementById("my-id").innerText = id;
-        });
+        function saveId(id) {
+            try { localStorage.setItem(ID_KEY, id); } catch (e) {}
+        }
 
-        peer.on('error', (err) => {
-            console.error(err);
-            if (err.type === 'unavailable-id') {
-                window.location.reload();
-            }
-        });
+        /* ---------- MEDIA ---------- */
 
-        peer.on('call', async (call) => {
+        async function getCallStream(type) {
+            const constraints = type === 'audio'
+                ? { audio: true, video: false }
+                : {
+                    audio: true,
+                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+                };
+            return navigator.mediaDevices.getUserMedia(constraints);
+        }
+
+        /* ---------- UI ---------- */
+
+        function showCallScreen(type, remoteId) {
+            loginScreen.classList.add('hidden');
+            callScreen.classList.remove('hidden');
+            callScreen.classList.toggle('audio-mode', type === 'audio');
+
+            $('avatar-letter').textContent = (remoteId || '?').charAt(0).toUpperCase();
+            $('audio-label').textContent = remoteId || '';
+
+            micOn = true;
+            camOn = true;
+            updateButtons();
+        }
+
+        function showLogin() {
+            callScreen.classList.add('hidden');
+            callScreen.classList.remove('audio-mode');
+            loginScreen.classList.remove('hidden');
+        }
+
+        function updateButtons() {
+            const mute = $('btn-mute');
+            const cam = $('btn-cam');
+            mute.classList.toggle('off', !micOn);
+            cam.classList.toggle('off', !camOn);
+            mute.innerHTML = micOn ? '&#127897;' : '&#128263;';
+            cam.innerHTML = camOn ? '&#127909;' : '&#128683;';
+        }
+
+        function startTimer() {
+            callSeconds = 0;
+            $('call-timer').textContent = '00:00';
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                callSeconds++;
+                const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+                const s = String(callSeconds % 60).padStart(2, '0');
+                $('call-timer').textContent = m + ':' + s;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        /* ---------- CALL HANDLING ---------- */
+
+        function attachCall(call, type) {
             currentCall = call;
-            await setupLocalStream();
-            call.answer(localStream);
-            showVideoScreen();
-            attachCallHandlers(call);
-        });
+            currentType = type;
 
-        async function callPartner() {
-            const partnerId = document.getElementById("partner-id").value.trim();
-            if (!/^\d{6}$/.test(partnerId)) {
-                alert("Please enter a valid 6-Digit ID!");
+            if (type === 'video') {
+                localVideo.srcObject = activeStream;
+                localVideo.style.display = '';
+            } else {
+                localVideo.srcObject = null;
+            }
+
+            waiting.classList.remove('hidden');
+
+            call.on('stream', remoteStream => {
+                // Remote audio plays through this element in both modes
+                remoteVideo.srcObject = remoteStream;
+                waiting.classList.add('hidden');
+                startTimer();
+            });
+
+            call.on('close', endCall);
+            call.on('error', endCall);
+        }
+
+        async function startCall(type) {
+            const remoteId = remoteIdInput.value.trim();
+            if (!remoteId) {
+                setStatus('Pehle doosre vyakti ka ID daalein.');
                 return;
             }
-            await setupLocalStream();
-            currentCall = peer.call(partnerId, localStream);
-            showVideoScreen();
-            attachCallHandlers(currentCall);
-        }
+            if (remoteId === peer?.id) {
+                setStatus('Aap apne aap ko call nahi kar sakte.');
+                return;
+            }
+            if (!peer || !peer.id) {
+                setStatus('Abhi connect ho raha hai, thodi der baad try karein.');
+                return;
+            }
+            if (currentCall) return;
 
-        function attachCallHandlers(call) {
-            call.on('stream', (remoteStream) => {
-                document.getElementById("remote-video").srcObject = remoteStream;
-            });
-            call.on('close', () => {
-                alert("Call ended.");
-                window.location.reload();
-            });
-            call.on('error', (err) => {
-                console.error(err);
-                alert("Call failed. Please try again.");
-                window.location.reload();
-            });
-        }
-
-        async function setupLocalStream() {
-            if (localStream) return;
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: currentFacingMode },
-                    audio: true
-                });
-                document.getElementById("local-video").srcObject = localStream;
+                setStatus('Call ho rahi hai...');
+                activeStream = await getCallStream(type);
+                const call = peer.call(remoteId, activeStream, { metadata: { type } });
+                showCallScreen(type, remoteId);
+                attachCall(call, type);
+                setStatus('');
             } catch (err) {
-                alert("Camera or Microphone permission denied!");
                 console.error(err);
+                stopStream();
+                setStatus(err.name === 'NotAllowedError'
+                    ? (type === 'audio' ? 'Mic ki permission dein.' : 'Camera aur mic ki permission dein.')
+                    : 'Call nahi ho saki. ID check karein.');
             }
         }
 
-        function showVideoScreen() {
-            document.getElementById("login-screen").style.display = "none";
-            document.getElementById("video-screen").style.display = "block";
-        }
-
-        function toggleMic() {
-            if (!localStream) return;
-            isMicOn = !isMicOn;
-            localStream.getAudioTracks()[0].enabled = isMicOn;
-            const micBtn = document.getElementById("mic-btn");
-            micBtn.innerText = isMicOn ? "🎤" : "🔇";
-            micBtn.classList.toggle("btn-off", !isMicOn);
-        }
-
-        function toggleVideo() {
-            if (!localStream) return;
-            isVideoOn = !isVideoOn;
-            localStream.getVideoTracks()[0].enabled = isVideoOn;
-            const camBtn = document.getElementById("cam-btn");
-            camBtn.innerText = isVideoOn ? "📹" : "🚫";
-            camBtn.classList.toggle("btn-off", !isVideoOn);
-        }
-
-        async function switchCamera() {
-            if (!localStream) return;
-
-            const oldVideoTrack = localStream.getVideoTracks()[0];
-            oldVideoTrack.stop();
-
-            currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
-
-            const newStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: currentFacingMode },
-                audio: false
-            });
-
-            const newVideoTrack = newStream.getVideoTracks()[0];
-            newVideoTrack.enabled = isVideoOn;
-
-            localStream.removeTrack(oldVideoTrack);
-            localStream.addTrack(newVideoTrack);
-            document.getElementById("local-video").srcObject = localStream;
-
-            if (currentCall && currentCall.peerConnection) {
-                const sender = currentCall.peerConnection.getSenders().find(s => s.track && s.track.kind === "video");
-                if (sender) sender.replaceTrack(newVideoTrack);
+        function stopStream() {
+            if (activeStream) {
+                activeStream.getTracks().forEach(t => t.stop());
+                activeStream = null;
             }
-
-            document.getElementById("local-video").style.transform =
-                currentFacingMode === "environment" ? "scaleX(1)" : "scaleX(-1)";
         }
 
         function endCall() {
-            if (currentCall) currentCall.close();
-            if (localStream) localStream.getTracks().forEach(track => track.stop());
-            window.location.reload();
+            if (currentCall) {
+                try { currentCall.close(); } catch (e) {}
+                currentCall = null;
+            }
+            stopStream();
+            stopTimer();
+            remoteVideo.srcObject = null;
+            localVideo.srcObject = null;
+            waiting.classList.remove('hidden');
+            showLogin();
+            setStatus('Call khatam ho gayi.');
         }
+
+        /* ---------- PEER SETUP ---------- */
+
+        function initPeer(id, retries = 0) {
+            setStatus('Connecting...');
+            videoCallBtn.disabled = true;
+            audioCallBtn.disabled = true;
+
+            peer = new Peer(id);
+
+            peer.on('open', peerId => {
+                $('my-id').textContent = peerId;
+                videoCallBtn.disabled = false;
+                audioCallBtn.disabled = false;
+                setStatus('Taiyaar hai. ID share karein.');
+            });
+
+            // Incoming call: answer with the same type the caller chose
+            peer.on('call', async call => {
+                if (currentCall) {
+                    call.close(); // already in a call
+                    return;
+                }
+                const type = call.metadata && call.metadata.type === 'audio' ? 'audio' : 'video';
+                try {
+                    activeStream = await getCallStream(type);
+                    call.answer(activeStream);
+                    showCallScreen(type, call.peer);
+                    attachCall(call, type);
+                    setStatus('');
+                } catch (err) {
+                    console.error(err);
+                    stopStream();
+                    call.close();
+                    setStatus('Mic ya camera ki permission nahi mili.');
+                }
+            });
+
+            peer.on('error', err => {
+                console.error(err);
+
+                if (err.type === 'unavailable-id') {
+                    // Same ID is still held on the server (e.g. page just refreshed).
+                    // Retry a few times before giving up, so the permanent ID is kept.
+                    peer.destroy();
+                    if (retries < 3) {
+                        setStatus('ID connect ho raha hai, thoda ruk rahe hain...');
+                        setTimeout(() => initPeer(id, retries + 1), 2000);
+                    } else {
+                        const newId = makeId();
+                        saveId(newId);
+                        setStatus('Ye ID pehle se kisi aur ke paas hai, naya ID bana rahe hain...');
+                        initPeer(newId);
+                    }
+                } else if (err.type === 'peer-unavailable') {
+                    setStatus('Is ID wala vyakti abhi online nahi hai.');
+                    if (currentCall) endCall();
+                } else if (err.type === 'network' || err.type === 'server-error') {
+                    setStatus('Internet connection check karein.');
+                } else {
+                    setStatus('Error: ' + err.type);
+                }
+            });
+
+            peer.on('disconnected', () => {
+                setStatus('Connection toot gaya. Dobara try ho raha hai...');
+                if (peer && !peer.destroyed) peer.reconnect();
+            });
+        }
+
+        /* ---------- EVENTS ---------- */
+
+        $('copy-btn').addEventListener('click', async () => {
+            const id = $('my-id').textContent;
+            try {
+                await navigator.clipboard.writeText(id);
+                setStatus('ID copy ho gaya!');
+            } catch (e) {
+                setStatus('Copy nahi ho paya. ID ko select karke copy karein.');
+            }
+        });
+
+        $('reset-id-btn').addEventListener('click', () => {
+            if (!confirm('Naya ID banane se purana ID band ho jayega. Aage rehna hai?')) return;
+            if (peer && !peer.destroyed) peer.destroy();
+            const newId = makeId();
+            saveId(newId);
+            initPeer(newId);
+        });
+
+        videoCallBtn.addEventListener('click', () => startCall('video'));
+        audioCallBtn.addEventListener('click', () => startCall('audio'));
+
+        remoteIdInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') startCall('video');
+        });
+
+        $('btn-mute').addEventListener('click', () => {
+            if (!activeStream) return;
+            micOn = !micOn;
+            activeStream.getAudioTracks().forEach(t => t.enabled = micOn);
+            updateButtons();
+        });
+
+        $('btn-cam').addEventListener('click', () => {
+            if (!activeStream || currentType !== 'video') return;
+            camOn = !camOn;
+            activeStream.getVideoTracks().forEach(t => t.enabled = camOn);
+            updateButtons();
+        });
+
+        $('btn-end').addEventListener('click', () => {
+            if (currentCall) endCall();
+            else showLogin();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (peer && !peer.destroyed) peer.destroy();
+        });
+
+        // Start with the saved permanent ID
+        initPeer(getSavedId());
     </script>
 </body>
 </html>
